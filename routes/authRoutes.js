@@ -32,7 +32,7 @@ router.post('/login', async (req, res) => {
   res.json({
     token,
     user: {
-      id: user._id,
+      _id: user._id,
       name: user.name,
       email: user.email,
       profilePic: user.profilePic || "", // Include profilePic if exists
@@ -48,6 +48,30 @@ router.get('/:id', async (req, res) => {
     res.json(user);
   } catch (err) {
     res.status(500).json({ msg: 'Error fetching user' });
+  }
+});
+
+// 🔧 Update user name/email
+router.put('/:id', async (req, res) => {
+  const { name, email } = req.body;
+
+  try {
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.id,
+      { name, email },
+      { new: true }
+    );
+
+    if (!updatedUser) return res.status(404).json({ msg: 'User not found' });
+
+    res.json({
+      _id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      profilePic: updatedUser.profilePic || "",
+    });
+  } catch (err) {
+    res.status(500).json({ msg: 'Error updating user' });
   }
 });
 
