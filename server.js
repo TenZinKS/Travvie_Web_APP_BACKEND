@@ -2,7 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const authRoutes = require('./routes/authRoutes');
-const userRoutes = require('./routes/userRoutes'); // ✅ Import routes
+const adminRoutes = require("./routes/adminRoutes");
+const userRoutes = require('./routes/userRoutes'); 
 
 require('dotenv').config();
 const app = express();
@@ -18,6 +19,8 @@ app.use(cors({
 app.use(express.json());
 
 // ✅ Then mount routes
+
+app.use("/api/admin", adminRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes); // ✅ Register here after middleware
 

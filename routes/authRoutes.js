@@ -6,23 +6,26 @@ const User = require('../models/User');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret';
 
-// Register route
+// User Signup
 router.post('/register', async (req, res) => {
   const { name, email, password } = req.body;
+
   const existingUser = await User.findOne({ email });
   if (existingUser) return res.status(400).json({ msg: 'User already exists' });
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  const newUser = new User({ name, email, password: hashedPassword });
+  const newUser = new User({ name, email, password: hashedPassword, isAdmin: false });
   await newUser.save();
+
   res.json({ msg: 'User registered successfully' });
 });
 
-// Login route
+// User Login
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
+
   const user = await User.findOne({ email });
-  if (!user) return res.status(400).json({ msg: 'User not found' });
+  if (!user || user.isAdmin) return res.status(400).json({ msg: 'User not found' });
 
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) return res.status(400).json({ msg: 'Incorrect password' });
@@ -32,47 +35,12 @@ router.post('/login', async (req, res) => {
   res.json({
     token,
     user: {
-      _id: user._id,
+      id: user._id,
       name: user.name,
       email: user.email,
-      profilePic: user.profilePic || "", // Include profilePic if exists
+      isAdmin: user.isAdmin,
     },
   });
-});
-
-// Get user by ID
-router.get('/:id', async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id);
-    if (!user) return res.status(404).json({ msg: 'User not found' });
-    res.json(user);
-  } catch (err) {
-    res.status(500).json({ msg: 'Error fetching user' });
-  }
-});
-
-// 🔧 Update user name/email
-router.put('/:id', async (req, res) => {
-  const { name, email } = req.body;
-
-  try {
-    const updatedUser = await User.findByIdAndUpdate(
-      req.params.id,
-      { name, email },
-      { new: true }
-    );
-
-    if (!updatedUser) return res.status(404).json({ msg: 'User not found' });
-
-    res.json({
-      _id: updatedUser._id,
-      name: updatedUser.name,
-      email: updatedUser.email,
-      profilePic: updatedUser.profilePic || "",
-    });
-  } catch (err) {
-    res.status(500).json({ msg: 'Error updating user' });
-  }
 });
 
 module.exports = router;
