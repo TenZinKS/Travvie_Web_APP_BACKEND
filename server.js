@@ -1,14 +1,15 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const path = require('path'); // ✅ important
 const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require("./routes/adminRoutes");
 const userRoutes = require('./routes/userRoutes'); 
-
 require('dotenv').config();
+
 const app = express();
 
-// ✅ Middleware should come first
+// ✅ Middleware
 app.use(cors({
   origin: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
@@ -18,13 +19,15 @@ app.use(cors({
 
 app.use(express.json());
 
-// ✅ Then mount routes
+// ✅ Serve uploaded files
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
+// ✅ Routes
 app.use("/api/admin", adminRoutes);
 app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes); // ✅ Register here after middleware
+app.use('/api/users', userRoutes);
 
-// ✅ Start server after successful DB connection
+// ✅ MongoDB + Start Server
 mongoose.connect(process.env.MONGO_URI)
   .then(() => app.listen(4000, () => console.log('✅ Server running on http://localhost:4000')))
   .catch(err => console.log(err));
