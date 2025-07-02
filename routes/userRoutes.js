@@ -5,9 +5,10 @@ const User = require('../models/User');
 // ✅ Get all users (excluding passwords)
 router.get('/', async (req, res) => {
   try {
-    const users = await User.find({}, { password: 0, __v: 0 }); // This still returns all other fields like isAdmin
+    const users = await User.find({}, { password: 0, __v: 0 });
     res.json(users);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ msg: 'Failed to fetch users' });
   }
 });
@@ -19,6 +20,7 @@ router.delete('/:id', async (req, res) => {
     if (!deleted) return res.status(404).json({ msg: 'User not found' });
     res.json({ msg: 'User deleted successfully' });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ msg: 'Failed to delete user' });
   }
 });
@@ -32,8 +34,12 @@ router.put('/block/:id', async (req, res) => {
     user.isBlocked = !user.isBlocked;
     await user.save();
 
-    res.json({ msg: `User ${user.isBlocked ? 'blocked' : 'unblocked'} successfully` });
+    res.json({
+      msg: `User ${user.isBlocked ? 'blocked' : 'unblocked'} successfully`,
+      user
+    });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ msg: 'Failed to update block status' });
   }
 });
@@ -51,33 +57,36 @@ router.put('/promote/:id', async (req, res) => {
     user.isAdmin = true;
     await user.save();
 
-    res.json({ msg: 'User promoted to admin successfully' });
+    res.json({
+      msg: 'User promoted to admin successfully',
+      user
+    });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ msg: 'Failed to promote user' });
   }
 });
 
-// PATCH all users to add isAdmin and isBlocked fields if missing
+// ✅ PATCH all users to add isAdmin and isBlocked if missing
 router.patch('/patch-all', async (req, res) => {
   try {
     const users = await User.find({});
-    const updates = await Promise.all(
-      users.map(async (user) => {
-        if (user.isAdmin === undefined || user.isBlocked === undefined) {
-          user.isAdmin = user.isAdmin || false;
-          user.isBlocked = user.isBlocked || false;
-          return await user.save();
-        }
-        return user;
-      })
-    );
-    res.json({ msg: "Users patched successfully", updated: updates.length });
+    let count = 0;
+
+    for (let user of users) {
+      if (user.isAdmin === undefined || user.isBlocked === undefined) {
+        user.isAdmin = user.isAdmin || false;
+        user.isBlocked = user.isBlocked || false;
+        await user.save();
+        count++;
+      }
+    }
+
+    res.json({ msg: "Users patched successfully", updated: count });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Failed to patch users" });
   }
 });
-
-
 
 module.exports = router;
