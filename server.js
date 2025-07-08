@@ -1,12 +1,15 @@
+require('dotenv').config();
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const path = require('path'); // ✅ important
+const path = require('path');
+
 const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require("./routes/adminRoutes");
-const userRoutes = require('./routes/userRoutes'); 
+const userRoutes = require('./routes/userRoutes');
 const tripRoutes = require("./routes/tripRoutes");
-require('dotenv').config();
+const deepseekRoutes = require("./routes/deepseekRoutes");
 
 const app = express();
 
@@ -28,8 +31,11 @@ app.use("/api/admin", adminRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use("/api/trips", tripRoutes);
+app.use("/api/deepseek-chat", deepseekRoutes);
 
 // ✅ MongoDB + Start Server
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => app.listen(4000, () => console.log('✅ Server running on http://localhost:4000')))
+  .then(() => app.listen(4000, () => {
+    console.log('✅ Server running on http://localhost:4000');
+  }))
   .catch(err => console.log(err));
