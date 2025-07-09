@@ -47,12 +47,25 @@ router.put("/:tripId", async (req, res) => {
   }
 });
 
-// ✅ Delete a trip
+// ✅ Delete a trip (prevent deletion if status is "upcoming")
 router.delete("/:tripId", async (req, res) => {
   try {
+    const trip = await Trip.findById(req.params.tripId);
+
+    if (!trip) {
+      return res.status(404).json({ msg: "Trip not found" });
+    }
+
+    if (trip.status === "upcoming") {
+      return res.status(403).json({
+        msg: "Cannot delete an upcoming trip. You can only change its status.",
+      });
+    }
+
     await Trip.findByIdAndDelete(req.params.tripId);
     res.json({ msg: "Trip deleted successfully" });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ msg: "Failed to delete trip" });
   }
 });

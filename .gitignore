@@ -1,0 +1,57 @@
+# Node.js dependencies
+node_modules/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# dotenv environment variables
+.env
+.env.local
+.env.*.local
+
+# Build output
+dist/
+build/
+coverage/
+
+# Next.js / Vite
+.next/
+out/
+.vite/
+
+# macOS system files
+.DS_Store
+
+# VSCode settings
+.vscode/
+
+# Optional: OS files
+Thumbs.db
+ehthumbs.db
+Icon?
+Desktop.ini
+
+# Optional: IDEs
+.idea/
+*.iml
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Optional: logs and test coverage
+*.tgz
+*.zip
+
+# Optional: typescript
+*.tsbuildinfo
