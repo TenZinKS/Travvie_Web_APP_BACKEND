@@ -6,7 +6,11 @@ const userSchema = new mongoose.Schema({
   password: String,
   isAdmin: { type: Boolean, default: false },
   isBlocked: { type: Boolean, default: false },
-  profilePic: { type: String }, 
+  profilePic: { type: String },
+
+  // ✅ Fields for password reset
+  resetToken: String,
+  resetTokenExpiry: Date,
 });
 
 module.exports = mongoose.model("User", userSchema);

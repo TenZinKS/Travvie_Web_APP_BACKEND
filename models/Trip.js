@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const TripSchema = new mongoose.Schema({
   title: String,
+  from: String,
   destination: String,
   startDate: Date,
   endDate: Date,
