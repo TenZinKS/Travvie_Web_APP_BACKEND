@@ -5,6 +5,9 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
 
+// Only required if you’re on Node.js 16 or lower:
+const fetch = require('node-fetch');
+
 const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require("./routes/adminRoutes");
 const userRoutes = require('./routes/userRoutes');
@@ -35,7 +38,30 @@ app.use("/api/deepseek-chat", deepseekRoutes);
 
 // ✅ MongoDB + Start Server
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => app.listen(4000, () => {
-    console.log('✅ Server running on http://localhost:4000');
-  }))
+  .then(() => {
+    app.listen(4000, () => {
+      console.log('✅ Server running on http://localhost:4000');
+
+      // 🔥 Keepalive interval (every 5 minutes)
+      setInterval(() => {
+        fetch('http://localhost:4000/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            email: "test@gmail.com",
+            password: "test"
+          }),
+        })
+          .then(res => res.json())
+          .then(data => {
+            console.log("[Keepalive] Successful login:", data);
+          })
+          .catch(err => {
+            console.error("[Keepalive] Failed to ping:", err.message);
+          });
+      }, 5 * 60 * 1000);
+    });
+  })
   .catch(err => console.log(err));
