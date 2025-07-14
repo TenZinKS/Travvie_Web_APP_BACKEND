@@ -4,8 +4,6 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
-
-// Only required if you’re on Node.js 16 or lower:
 const fetch = require('node-fetch');
 
 const authRoutes = require('./routes/authRoutes');
@@ -16,7 +14,7 @@ const deepseekRoutes = require("./routes/deepseekRoutes");
 
 const app = express();
 
-// ✅ Middleware
+// ✅ CORS
 app.use(cors({
   origin: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
@@ -39,12 +37,12 @@ app.use("/api/deepseek-chat", deepseekRoutes);
 // ✅ MongoDB + Start Server
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
-    app.listen(4000, () => {
-      console.log('✅ Server running on http://localhost:4000');
+    app.listen(4000, '0.0.0.0', () => {
+      console.log('✅ Server running on http://0.0.0.0:4000');
 
       // 🔥 Keepalive interval (every 5 minutes)
       setInterval(() => {
-        fetch('http://localhost:4000/api/auth/login', {
+        fetch('http://127.0.0.1:4000/api/auth/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
