@@ -34,32 +34,36 @@ app.use('/api/users', userRoutes);
 app.use("/api/trips", tripRoutes);
 app.use("/api/deepseek-chat", deepseekRoutes);
 
-// ✅ MongoDB + Start Server
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => {
-    app.listen(4000, '0.0.0.0', () => {
-      console.log('✅ Server running on http://0.0.0.0:4000');
+// ✅ Only connect in non-test environments
+if (process.env.NODE_ENV !== "test") {
+  mongoose.connect(process.env.MONGO_URI)
+    .then(() => {
+      app.listen(4000, '0.0.0.0', () => {
+        console.log('✅ Server running on http://0.0.0.0:4000');
 
-      // 🔥 Keepalive interval (every 5 minutes)
-      setInterval(() => {
-        fetch('http://127.0.0.1:4000/api/auth/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            email: "test@gmail.com",
-            password: "test"
-          }),
-        })
-          .then(res => res.json())
-          .then(data => {
-            console.log("[Keepalive] Successful login:", data);
+        // 🔥 Keepalive interval (every 5 minutes)
+        setInterval(() => {
+          fetch('http://127.0.0.1:4000/api/auth/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              email: "test@gmail.com",
+              password: "test"
+            }),
           })
-          .catch(err => {
-            console.error("[Keepalive] Failed to ping:", err.message);
-          });
-      }, 5 * 60 * 1000);
-    });
-  })
-  .catch(err => console.log(err));
+            .then(res => res.json())
+            .then(data => {
+              console.log("[Keepalive] Successful login:", data);
+            })
+            .catch(err => {
+              console.error("[Keepalive] Failed to ping:", err.message);
+            });
+        }, 5 * 60 * 1000);
+      });
+    })
+    .catch(err => console.log(err));
+}
+
+module.exports = app;
