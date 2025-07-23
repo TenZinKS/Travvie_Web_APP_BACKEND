@@ -50,7 +50,7 @@ if (process.env.NODE_ENV !== "test") {
             },
             body: JSON.stringify({
               email: "test@gmail.com",
-              password: "test"
+              password: "tenzin"
             }),
           })
             .then(res => res.json())
