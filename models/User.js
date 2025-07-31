@@ -13,4 +13,5 @@ const userSchema = new mongoose.Schema({
   resetTokenExpiry: Date,
 });
 
-module.exports = mongoose.model("User", userSchema);
+// If this model has already been compiled, reuse it. Otherwise define it.
+module.exports = mongoose.models.User || mongoose.model("User", userSchema);

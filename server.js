@@ -10,6 +10,7 @@ const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require("./routes/adminRoutes");
 const userRoutes = require('./routes/userRoutes');
 const tripRoutes = require("./routes/tripRoutes");
+const uploadRoute = require('./routes/uploadRoute');
 const deepseekRoutes = require("./routes/deepseekRoutes");
 
 const app = express();
@@ -32,6 +33,7 @@ app.use("/api/admin", adminRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use("/api/trips", tripRoutes);
+app.use('/api/upload', uploadRoute);
 app.use("/api/deepseek-chat", deepseekRoutes);
 
 // ✅ Only connect in non-test environments
