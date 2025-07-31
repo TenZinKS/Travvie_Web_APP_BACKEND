@@ -37,12 +37,23 @@ router.post('/register', async (req, res) => {
     });
 
     await newUser.save();
-    res.json({ msg: 'User registered successfully' });
+
+    res.status(200).json({
+      msg: 'User registered successfully',
+      user: {
+        _id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+        profilePic: newUser.profilePic || '',
+        isAdmin: newUser.isAdmin,
+      },
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: 'Server error during registration' });
   }
 });
+
 
 // ✅ User Login
 router.post('/login', async (req, res) => {

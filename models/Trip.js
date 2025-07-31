@@ -11,4 +11,5 @@ const TripSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 });
 
-module.exports = mongoose.model("Trip", TripSchema);
+// ✅ Prevent model overwrite in test environments
+module.exports = mongoose.models.Trip || mongoose.model("Trip", TripSchema);
