@@ -1,3 +1,6 @@
+// backend/routes/authRoutes.js
+
+require('dotenv').config();
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -38,8 +41,10 @@ router.post('/register', async (req, res) => {
 
     await newUser.save();
 
+    // return email at top level for tests, plus full user object if you need it
     res.status(200).json({
       msg: 'User registered successfully',
+      email: newUser.email,
       user: {
         _id: newUser._id,
         name: newUser.name,
@@ -53,7 +58,6 @@ router.post('/register', async (req, res) => {
     res.status(500).json({ msg: 'Server error during registration' });
   }
 });
-
 
 // ✅ User Login
 router.post('/login', async (req, res) => {
@@ -98,6 +102,7 @@ router.put('/:id', upload.single('profilePic'), async (req, res) => {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ msg: 'User not found' });
 
+    // handle replacing an existing profilePic
     if (req.file && user.profilePic) {
       const oldFile = path.join(
         __dirname,
@@ -113,6 +118,7 @@ router.put('/:id', upload.single('profilePic'), async (req, res) => {
       user.profilePic = `http://localhost:4000/uploads/${req.file.filename}`;
     }
 
+    // update name if provided
     if (name) user.name = name;
 
     await user.save();
@@ -144,7 +150,6 @@ router.post('/reset-password-request', async (req, res) => {
     await user.save();
 
     const resetLink = `${process.env.CLIENT_URL}/reset-password/${token}`;
-
     const transporter = nodemailer.createTransport({
       host: process.env.EMAIL_HOST,
       port: process.env.EMAIL_PORT,
@@ -183,18 +188,15 @@ router.post('/reset-password/:token', async (req, res) => {
       resetToken: req.params.token,
       resetTokenExpiry: { $gt: Date.now() },
     });
-
     if (!user) {
       return res
         .status(400)
         .json({ msg: 'Invalid or expired password reset token.' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    user.password = hashedPassword;
+    user.password = await bcrypt.hash(password, 10);
     user.resetToken = undefined;
     user.resetTokenExpiry = undefined;
-
     await user.save();
 
     res.json({ msg: 'Password reset successfully.' });
@@ -216,8 +218,7 @@ router.put('/change-password/:id', async (req, res) => {
     if (!isMatch)
       return res.status(400).json({ msg: "Current password incorrect" });
 
-    const hashedNew = await bcrypt.hash(newPassword, 10);
-    user.password = hashedNew;
+    user.password = await bcrypt.hash(newPassword, 10);
     await user.save();
 
     res.json({ msg: "Password updated successfully." });
@@ -231,13 +232,9 @@ router.put('/change-password/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
-
-    if (!user) {
-      return res.status(404).json({ msg: 'User not found' });
-    }
+    if (!user) return res.status(404).json({ msg: 'User not found' });
 
     await user.deleteOne();
-
     res.json({ msg: 'User deleted successfully.' });
   } catch (err) {
     console.error(err);
