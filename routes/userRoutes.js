@@ -67,19 +67,18 @@ router.put('/promote/:id', async (req, res) => {
   }
 });
 
-// ✅ PATCH all users to add isAdmin and isBlocked if missing
+// ✅ PATCH all users to (re-)apply isAdmin & isBlocked
 router.patch('/patch-all', async (req, res) => {
   try {
     const users = await User.find({});
     let count = 0;
 
     for (let user of users) {
-      if (user.isAdmin === undefined || user.isBlocked === undefined) {
-        user.isAdmin = user.isAdmin || false;
-        user.isBlocked = user.isBlocked || false;
-        await user.save();
-        count++;
-      }
+      // ensure both flags exist as booleans
+      user.isAdmin = !!user.isAdmin;
+      user.isBlocked = !!user.isBlocked;
+      await user.save();
+      count++;
     }
 
     res.json({ msg: "Users patched successfully", updated: count });
